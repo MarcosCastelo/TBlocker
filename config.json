@@ -1,0 +1,25 @@
+{
+    "password": "1234", 
+    "blocked_sites": [
+      "pornhub.com",
+      "xvideos.com",
+      "steamcommunity.com",
+      "store.steampowered.com",
+      "riotgames.com",
+      "www.databass.dev"
+    ],
+    "blocked_apps": [
+      "steam.exe",
+      "minecraft.exe",
+      "epicgameslauncher.exe",
+      "leagueoflegends.exe",
+      "LeagueClientUx.exe"
+    ],
+    "schedule": {
+        "start": "17:00",
+        "end": "22:00"
+    },
+    "unlock_password": "123",
+    "hardcore": true
+  }
+  
