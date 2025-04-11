@@ -13,10 +13,10 @@ class BlockerConfigurator(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("Monk Blocker - Configurador")
+        self.title("TBlocker - Configurador")
         self.geometry("600x550")
 
-        self.label_title = ctk.CTkLabel(self, text="Monk Blocker", font=("Segoe UI", 24, "bold"))
+        self.label_title = ctk.CTkLabel(self, text="TBlocker", font=("Segoe UI", 24, "bold"))
         self.label_title.pack(pady=(20, 10))
 
         self.blocked_sites_entry = ctk.CTkEntry(self, placeholder_text="Sites bloqueados (separados por vírgula)")

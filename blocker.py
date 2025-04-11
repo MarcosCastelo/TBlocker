@@ -107,7 +107,7 @@ def main():
     password = config.get("unlock_password")
     hardcore = config.get("hardcore", False)
     
-    log_event("[MonkBlocker] running... (CTRL+C - close)")
+    log_event("[TBlocker] running... (CTRL+C - close)")
     
     try:
         while True:
@@ -116,7 +116,7 @@ def main():
                 kill_blocked_apps(apps)
             time.sleep(5)
     except KeyboardInterrupt:
-        log_event("\n [MonkBlocker] Stop requested")
+        log_event("\n [TBlocker] Stop requested")
         if hardcore:
             if has_block_time_ended(schedule):
                 log_event("[Hardcore Mode] Block time finished. Closing...")
