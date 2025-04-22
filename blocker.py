@@ -3,6 +3,9 @@ import time
 import psutil
 import time
 import getpass
+import signal
+import atexit
+import sys
 from datetime import datetime
 
 from utils import load_config
@@ -10,6 +13,10 @@ from utils import load_config
 HOST_PATH = r"C:\Windows\System32\drivers\etc\hosts"
 REDIRECT_IP = "127.0.0.1"
 LOG_FILE = "blocker.log"
+
+sites = []
+schedule = {}
+hardcore = False
 
 def log_event(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -31,7 +38,7 @@ def is_within_schedule(schedule):
             return start <= now <= end
         else:
             return now >= start or now <= end
-    except:
+    except Exception as e:
         log_event(f"Schedule verification error: {e}")
         
 def has_block_time_ended(schedule):
@@ -55,10 +62,13 @@ def block_sites(sites):
 def unblock_sites(sites):
     with open(HOST_PATH, "r") as file:
         lines = file.readlines()
-    with open(HOST_PATH,  "w") as file:
+
+    with open(HOST_PATH, "w") as file:
         for line in lines:
-            if not any(site in line for site in sites):
-                file.write(line)
+            parts = line.strip().split()
+            if len(parts) == 2 and parts[0] == REDIRECT_IP and parts[1] in sites:
+                continue 
+            file.write(line)
 
 def kill_blocked_apps(apps):
     for proc in psutil.process_iter(["name"]):
@@ -94,7 +104,17 @@ def verify_password(stored_password):
     log_event("[!] Tentativas esgotadas. Continuando bloqueio.")
     return False
 
+def clean_exit():
+    log_event("[EXIT] Ending process")
+    if not hardcore or has_block_time_ended(schedule):
+        unblock_sites(sites)
+        log_event("[TBlocker] All released.")
+    else:
+        log_event("[Hardcore Mode] Block still alive.")
+
 def main():
+    global sites, schedule, hardcore
+    
     try:
         config = load_config()
         validate_config(config)
@@ -109,26 +129,18 @@ def main():
     
     log_event("[TBlocker] running... (CTRL+C - close)")
     
+    signal.signal(signal.SIGTERM, lambda sig, frame: sys.exit(0))
+    signal.signal(signal.SIGINT, lambda sig, frame: sys.exit(0))
+    atexit.register(clean_exit)
+    
     try:
         while True:
             if is_within_schedule(schedule):    
                 block_sites(sites)
                 kill_blocked_apps(apps)
             time.sleep(5)
-    except KeyboardInterrupt:
-        log_event("\n [TBlocker] Stop requested")
-        if hardcore:
-            if has_block_time_ended(schedule):
-                log_event("[Hardcore Mode] Block time finished. Closing...")
-                unblock_sites(sites)
-            else:
-                log_event("[Hardcore Mode] Block time is not finished yet.")
-        elif password:
-            if verify_password(password):
-                unblock_sites(sites)
-        else:
-            log_event("[!] No password. Blocker closing.")
-            unblock_sites(sites)
-        
+    except SystemExit:
+        pass
+    
 if __name__ == "__main__":
     main()
